@@ -1,0 +1,67 @@
+/* MIRSKY, "Vibrations of Orthotropic, Thick, Cylindrical Shells", JASA 36(1), 1964.
+
+m = h/R (thickness ratio parameter)
+d = delta = h/L (wavelength parameter)
+W = Omega = wh/c_s (freqeuncy parameter)
+
+W is taken as the variable, d as the unknown.
+*/
+
+
+/* by definition: b_ij = c_ij/c_44 */
+b44: 1; /* seems unused here */
+/* additionnal simplifications. Isotropic?? The following lines do not lighten things... */
+/* b12: 2*nu/(1-2*nu);
+b23: b12;
+b22: b12 + 2;
+b11: b22; */
+
+/* Following lines in case of ISOTROPIC material: */
+b33: b11;
+b13: b12;
+b66: b44; /* seems to be unused at the end since n=0... */
+
+
+n: 0; /* number of circumferential waves */
+n2: n*n;
+d2: d*d;
+W2: W*W;
+
+A11: 4*pi2*b33*d2 - W2 + m2*n2*b66*(1 + m2/12);
+A12: m*pi2*d2*b33/3 - m*W2/12 - m3*n2*b66/12;
+A15: 2*pi*m*d*b23;
+A16: 2*pi*d*b13;
+A22: pi2*d2*b33/3 - W2/12 + kx2 + m2*n2*b66/12;
+A25: -2*pi*d*kx2;
+A26: pi*m*d*(b13 + b23 - kx2)/6;
+A55: 4*pi2*d2*kx2 - W2 + m2*(1 + m2/12)*(b22 + n2*kt2*b55);
+A56: pi2*d2*m*kx2/3 - m*W2/12 + m*(b12 - m2*b22/12) - m3*n2*kt2*b55/12;
+A66: pi2*d2*kx2/3 - W2/12 + b11 + m2*b22/12 + m2*n2*b55*kt2/12;
+
+A: matrix([A11, A12, A15, A16], [A12, A22, A25, A26], [A15, A25, A55, A56], [A16, A26, A56, A66])$
+
+det: determinant(A)$
+
+for i:0 thru 4 do ( CC[i]: ratcoef(det, d, 2*i) );
+for i:0 thru 6 do ( DD[i]: ratcoef(det, W, 2*i) );
+
+/* write expressions in file */
+stream: openw("mirsky1964.m");
+printf(stream, "% Unknown is Delta~%");
+for i:0 thru 4  do  ( printf(stream, "C[~d]=~a~%", i, CC[i]) );
+printf(stream, "% Unknown is Omega2~%");
+for i:0 thru 6  do  ( printf(stream, "C[~d]=~a~%", i, DD[i]) );
+close(stream);
+
+/* CHANGE OF VARIABLE, SWITCH TO (W, C) */
+/* d: m*W/C/2/pi; error... */
+d: W/C/2/pi; /* 16/03/2020 correction */
+pi2: pi*pi;
+m2: m*m;
+dett: det*C^8, eval;
+for i:0 thru 7 do ( EE[i]: ratcoef(dett, C, 2*i) );
+
+stream: openw("mirsky1964C.m");
+for i:0 thru 7  do  ( printf(stream, "C[~d]=~a~%", i, EE[i]) );
+close(stream);
+

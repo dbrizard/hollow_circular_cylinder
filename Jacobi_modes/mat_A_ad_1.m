@@ -1,0 +1,16 @@
+A(1,1)=-((ep1^2-1)*gamma^2*lambda+(2*ep1^2-2)*mu*gamma^2+(ep1^2-1)*omega^2)/2;
+A(1,2)=(1-ep1^2)*gamma*lambda;
+A(1,3)=((ep1^4-ep1^2)*gamma^2*lambda+(2*ep1^4-2*ep1^2)*mu*gamma^2+(ep1^4-ep1^2)*omega^2)/2;
+A(1,4)=(3*ep1^4-2*ep1^2-1)*gamma*lambda/2;
+A(2,1)=(ep1^2-1)*gamma*lambda;
+A(2,2)=((8*ep1^2-8)*lambda+(1-ep1^4)*mu*gamma^2+(1-ep1^4)*omega^2+(8*ep1^2-8)*mu)/4;
+A(2,3)=(ep1^2-ep1^4)*gamma*lambda+(ep1^4-1)*mu*gamma;
+A(2,4)=-((12*ep1^4-8*ep1^2-4)*lambda+(ep1^4-ep1^6)*mu*gamma^2+(ep1^4-ep1^6)*omega^2+(12*ep1^4-8*ep1^2-4)*mu)/4;
+A(3,1)=((ep1^4-ep1^2)*gamma^2*lambda+(2*ep1^4-2*ep1^2)*mu*gamma^2+(ep1^4-ep1^2)*omega^2)/2;
+A(3,2)=(ep1^4-ep1^2)*gamma*lambda+(1-ep1^4)*mu*gamma;
+A(3,3)=-((4*ep1^6-6*ep1^4+3*ep1^2-1)*gamma^2*lambda+(8*ep1^6-12*ep1^4+6*ep1^2-2)*mu*gamma^2+(4*ep1^6-6*ep1^4+3*ep1^2-1)*omega^2+(24-24*ep1^4)*mu)/6;
+A(3,4)=-((4*ep1^6-5*ep1^4+2*ep1^2-1)*gamma*lambda+(2*ep1^4-2*ep1^6)*mu*gamma)/2;
+A(4,1)=-(3*ep1^4-2*ep1^2-1)*gamma*lambda/2;
+A(4,2)=-((12*ep1^4-8*ep1^2-4)*lambda+(ep1^4-ep1^6)*mu*gamma^2+(ep1^4-ep1^6)*omega^2+(12*ep1^4-8*ep1^2-4)*mu)/4;
+A(4,3)=((4*ep1^6-5*ep1^4+2*ep1^2-1)*gamma*lambda+(2*ep1^4-2*ep1^6)*mu*gamma)/2;
+A(4,4)=((192*ep1^6-192*ep1^4+64*ep1^2-64)*lambda+(-9*ep1^8+16*ep1^6-8*ep1^4+1)*mu*gamma^2+(-9*ep1^8+16*ep1^6-8*ep1^4+1)*omega^2+(240*ep1^6-192*ep1^4+64*ep1^2-112)*mu)/32;

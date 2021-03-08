@@ -1,0 +1,67 @@
+/* Coefficients of the polynomial of s variable from equation [27]
+of the Mirsky 1958 Journal of Applied Mechanics article 
+
+m = h/R (thickness to mean radius ratio)
+s = c/c_s
+d = h/L (thickness to wavelenght ratio)
+
+a stands for log(...), see p.101
+    /!\ THIS IS NOT INNER RADIUS, NOR THE WAVE NUMBER
+s2 stands for s^2
+k2 stands for kappa^2 (shear coefficient)
+nu2 stands for nu^2 (Poisson's ratio)
+*/
+
+
+/* Parameters depending on Poisson's ratio
+M: 2*(1 - nu)/(1 - 2*nu);
+P: 1/(1 - 2*nu); */
+
+/* Parameters depending on thickness ratio m
+A: 1 - m^2/12;
+B: 1 - m^2/6;
+C: 1 - m^2/12 + m^4/36; */
+
+
+
+/* terms that appear more than once
+MaPm: M*a - P*m;
+Mam: M*a*m + 4*M*a/m - 4*m^2*P/3; */
+
+/* c_{ij} level two coefficients */
+
+/* c8, c6, c4, c2 level one coefficients */
+c8: 16/9*A^2*(s2-M)^2*(s2-k2)^2;
+c6: c66*s2^3 - c64*s2^2 + c62*s2 - c60;
+c4: c44*s2^2 - c42*s2 + c40;
+c2: (s2 - (M - 4*P*nu2))*16*m*P*k2* MaPm;
+
+
+/* finally define equation [27] */
+eq27: c8*pi8d8 - c6*pi6d6 + c4*pi4d4 - c2*pi2d2;
+
+/* Get the coefficients */
+for n:0 thru 5 do ( CC[n]: ratcoef(eq27, s2, n) );
+
+
+/* CHANGE VARIABLES TO (W, C) */
+d2: W2/s2/4/pi2;
+pi2d2: pi2*d2;
+pi4d4: pi2d2^2;
+pi6d6: pi2d2^3;
+pi8d8: pi2d2^4;
+s8: s2^4;
+s6: s2^3;
+eqq27: s8*eq27, eval;
+for n:0 thru 6 do ( DD[n]: ratcoef(eqq27, s2, n) );
+
+
+/* write expressions in file */
+stream: openw("mirsky1958thick.m");
+for i:0 thru 5  do  ( printf(stream, "C[~d]=~a~%", i, CC[i]) );
+printf(stream, "% Change of variable (W, C)~%");
+for i:0 thru 6  do  ( printf(stream, "C[~d]=~a~%", i, DD[i]) );
+close(stream);
+
+
+

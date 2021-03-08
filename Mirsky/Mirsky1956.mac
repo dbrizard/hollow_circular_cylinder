@@ -1,0 +1,90 @@
+/* Coefficients of the polynomial of s variable from equation [21]
+of the Mirsky 1956 Journal of Applied Mechanics article 
+
+s2 stands for s^2,
+d2 stands for delta^2,
+pi2 stands for pi^2,
+m2 stands for m^2,
+k2 stands for k^2. (kappa)
+Only N and nu are not always squared in eq [21]  */
+t1: 1/3*d2*(2*N-s2)^2;
+t2: 4*pi2*k2*d2 - 4*pi2*s2*d2 + 2*N*m2*(1+m2/12);
+t22: 1-m2/12;
+t3: 2*N - s2;
+t4: 2*N/pi2*k2*m2*(1+m2/12) - 4*k2*s2*d2 - 4/3*nu*k2*N*d2*m2 - 4/3*nu^2*N^2*d2*m2;
+t5: -4*N^2*nu^2/pi2*k2*m2;
+eq21: t1*t2*t22 + t3*t4 + t5;
+/* well, seems to be the good equation */
+
+/* Get the coefficients */
+for n:0 thru 3 do ( C[n]: ratcoeff(eq21, s2, n) );
+
+
+/* ---eq [26]---
+d4 stands for delta^4 
+pi4 stands for pi^4
+N2 stands for N2
+N3 stands for N^3  */
+dNs2: 2*N-s2;
+t61: 8/3*N*k2*pi4*d4 -8/3*N*pi4*d4*s2 - 4*pi2*k2*s2*d2;
+t62: 2*N*k2*m2 + 4/3*N2*pi2*d2*m2*(1+m2/12);
+t63: 4/9*N2*pi4*d4*(s2-k2)*m2 - 2/9*N3*pi2*d2*m2^2*(1+m2/12);
+t64: -8/3*N2*nu*k2*pi2*d2*m2 - 4*nu^2*N2*k2*m2 - 8/3*nu^2*N3*pi2*d2*m2;
+eq26: dNs2*(t61 + t62) + t63 +t64;
+
+for n:0 thru 2 do ( D[n]: ratcoeff(eq26, s2, n) );
+
+
+/* ---eq [27]--- */
+/* there seems to be a typpo in this equation, but would have to recompute to find the error... */
+t71: -8/3*pi4*N*d4 + 2/9*pi4*N*d4*m2;
+t72: 4/3*pi4*s2*d4 - 1/9*pi4*m2*s2*d4 + 4*pi2*s2*d2;
+t73: 2/3*N*nu*pi2*d2*m2 - 2*N*m*(1+m2/12);
+t74: 2*nu*N*m2*(2/3*pi2*N*d2 - pi2/3*s2*d2 + 2*nu*N);
+eq27: dNs2*(t71 + t72 + t73) + t74;
+
+for n:0 thru 2 do ( E[n]: ratcoeff(eq27, s2, n) );
+
+
+/* ---eq [29]--- */
+t91: 4*pi2*s2*d2 - 2*N*m2*(1+m2/12) - 8/3*N*pi4*d4;
+t92: 4*N2*m2*(nu + pi2*d2/3)^2;
+eq29: dNs2*t91 + t92;
+
+for n:0 thru 2 do ( F[n]: ratcoeff(eq29, s2, n) );
+
+/* write expressions in file */
+stream: openw("mirsky1956.m");
+printf(stream, "% Full approximate therory, eq [21]~%");
+for i:0 thru 3  do  ( printf(stream, "C[~d]=~a~%", i, C[i]) );
+printf(stream, "% Neglecting Rotatory Inertia, eq [26]~%");
+for i:0 thru 2  do  ( printf(stream, "C[~d]=~a~%", i, D[i]) );
+printf(stream, "% Neglecting Shear Deformation, eq [27]~%");
+for i:0 thru 2  do  ( printf(stream, "C[~d]=~a~%", i, E[i]) );
+printf(stream, "% Bending theory, eq [29]~%");
+for i:0 thru 2  do  ( printf(stream, "C[~d]=~a~%", i, F[i]) );
+close(stream);
+
+
+/* NOW SWITCH TO (W,C) PARAMETERS */
+s4: s2*s2;
+d2: W2/s2/4/pi2; /* erroneous 'm2*' term ? */
+d4: W4/s4/16/pi4; /* erroneous 'm4*' term ? */
+eqq21: s4*eq21, eval;
+eqq26: s4*eq26, eval;
+eqq27: s4*eq27, eval;
+eqq29: s4*eq29, eval;
+for n:0 thru 6 do ( CC[n]: ratcoeff(eqq21, s2, n) );
+for n:0 thru 6 do ( DD[n]: ratcoeff(eqq26, s2, n) );
+for n:0 thru 6 do ( EE[n]: ratcoeff(eqq27, s2, n) );
+for n:0 thru 6 do ( FF[n]: ratcoeff(eqq29, s2, n) );
+stream: openw("mirsky1956C.m");
+printf(stream, "% From: Full approximate therory, eq [21]~%");
+for i:0 thru 6  do  ( printf(stream, "C[~d]=~a~%", i, CC[i]) );
+printf(stream, "% From: Neglecting Rotatory Inertia, eq [26]~%");
+for i:0 thru 6  do  ( printf(stream, "C[~d]=~a~%", i, DD[i]) );
+printf(stream, "% From: Neglecting Shear Deformation, eq [27]~%");
+for i:0 thru 6  do  ( printf(stream, "C[~d]=~a~%", i, EE[i]) );
+printf(stream, "% From: Bending theory, eq [29]~%");
+for i:0 thru 6  do  ( printf(stream, "C[~d]=~a~%", i, FF[i]) );
+close(stream);

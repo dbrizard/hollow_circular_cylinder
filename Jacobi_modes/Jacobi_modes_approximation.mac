@@ -1,0 +1,158 @@
+/*  Jacobi modes approximation for longitudinal wave propagation in hollow circular cylinder
+30/12/2018: first release.
+03/2021: english version
+ 
+
+ Ecriture sans "exp(gamma*x+I*omega*t)" et on fait la dérivation par rapport à x en multipliant par "gamma" 
+ et la dérivation par rapport à t en multipliant par "i omega"
+ On utilise la nullité de sigma_r et sigma_xr en r=a
+
+ Cela simplifie les écritures car on n'a pas à prendre explicitement en compte "exp(gamma x + i omega t)"
+
+
+ Un et Vn vary from 0 to 1
+
+
+In the program, x, r, t are dimensioneless variables (to simplify writing)
+    x <=> x/L        L : length of tube
+    r <=> r/R        R : external radius of tube
+    ep<=> a/R        ep : thickness of tube
+    ep1=1-ep
+    t <=> (c0/R) t   c0^2=E/rho (E : Young modulus, rho : density)
+
+ On en déduit 
+   omega <=> (R/c0) t
+   gamma <=> gamma L
+
+   sigma <=> sigma/E
+   u     <=> u/R
+   U[n]  <=> U[n]/R
+   V[n]  <=> V[n]/R
+
+ On en déduit 
+   lambda <=> lambda/E  (coef de Lamé)
+   mu     <=> mu/E      (coef de Lamé)
+
+ Ecriture avec "exp(gamma*x+I*omega*t)" et on fait les calculs en considérant les dép comme étant des 
+ fonctions de x et de t.
+
+*/ 
+
+N:3$ /* number of modes = 2*(N+1) */
+
+/* FILE AND DIRECTORY NAMES
+repertoire: "/home/dbrizard/Calcul/18_tube_disp/maxima/JacobiPoly/temp/"$ */
+repertoire: "temp/"$
+fnamematr: concat(repertoire, "mat_A_ad_", string(N), ".m")$
+fnamepoly: concat(repertoire, "poly_cara_ad_", string(N), ".m")$
+fnamelog: concat(repertoire, "customlog_N", string(N))$
+load(stringproc)$
+
+/* VERBOSE */
+stream: openw(fnamelog);
+printf(stream, timedate());
+printf(stream, " start~%");
+
+
+
+u_x:0$
+
+u_r:0$
+
+for n: 0 thru N do (
+	U[n]:0,
+	V[n]:0,
+	for k: 0 thru n do (
+		U[n]:U[n]+(-1)^k*binomial(n, k)*factorial(n+k)/factorial(n)/factorial(k)*(r)^(2*k),
+		V[n]:V[n]+(-1)^k*binomial(n, k)*factorial(n+k+1)/factorial(n+1)/factorial(k+1)*(r)^(2*k+1)
+	),
+	u_x:u_x+U[n]*u[n],
+	u_r:u_r+V[n]*v[n]
+);
+
+epsilon_x:gamma*u_x$
+epsilon_r:diff(u_r,r)$
+epsilon_t:u_r/(r)$
+epsilon_xr:diff(u_x,r)+gamma*u_r$
+DD:epsilon_x+epsilon_r+epsilon_t$
+
+sigma_x:lambda*DD+2*mu*epsilon_x$
+sigma_r:lambda*DD+2*mu*epsilon_r$
+sigma_t:lambda*DD+2*mu*epsilon_t$
+sigma_xr:mu*epsilon_xr$
+
+dsigma_xdx:gamma*sigma_x$
+dsigma_rdr:diff(sigma_r,r)$
+dsigma_xrdx:gamma*sigma_xr$
+dsigma_xrdr:diff(sigma_xr,r)$
+
+d2u_xdt2:-omega^2*u_x$
+d2u_rdt2:-omega^2*u_r$
+
+PFD_x:-d2u_xdt2+dsigma_xdx$
+PFD_r:-d2u_rdt2+dsigma_xrdx+1/r*(-sigma_t)$
+
+/* Remainder: ep1=1-ep  */
+ep1: 1-ep$
+for n : 0 thru N do (
+	dUdr[n]:diff(U[n],r),
+	dVdr[n]:diff(V[n],r),
+	Poly_x[n]:integrate(r*PFD_x*U[n],r,ep1,1)-integrate(r*sigma_xr*dUdr[n],r,ep1,1),
+	Poly_r[n]:integrate(r*PFD_r*V[n],r,ep1,1)-integrate(r*sigma_r*dVdr[n],r,ep1,1)
+);
+
+
+array(AA,2*N+2,2*N+2)$
+for n : 1 thru N+1 do 
+	for k :1 thru N+1 do (
+		AA[2*n-1,2*k-1]:ratcoeff(Poly_x[n-1],u[k-1]),
+		AA[2*n-1,2*k]:ratcoeff(Poly_x[n-1],v[k-1]),
+		AA[2*n,2*k-1]:ratcoeff(Poly_r[n-1],u[k-1]),
+		AA[2*n,2*k]:ratcoeff(Poly_r[n-1],v[k-1])
+);
+A:genmatrix(AA,2*N+2,2*N+2);
+
+
+/* VERBOSE */
+printf(stream, timedate());
+printf(stream, " matrix is defined~%");
+
+
+d:determinant(A)$
+
+/* VERBOSE */
+printf(stream, timedate());
+printf(stream, " determinant is defined~%");
+
+
+for n : 0  thru 2*(N+1) do (
+	C[n]:96*ratcoeff(d,gamma,2*(2*(N+1)-n)),
+	/* VERBOSE */
+	tempname: concat(fnamelog, "_C", string(n)),
+	streamm: openw(tempname),
+	printf(streamm, timedate()),
+	close(streamm)
+);
+
+
+
+/* VERBOSE */
+printf(stream, timedate());
+printf(stream, " end of collecting terms~%");
+close(stream);
+
+
+/* WRITE RESULTS IN FILES */
+/* Write matrices */
+stream: openw(fnamematr);
+for i : 1 thru 2*N+2  do 
+	for j : 1 thru 2*N+2  do (
+printf( stream,"A(~d,~d)=~a;~%",i,j,A[i,j] ) );
+close(stream);
+
+/* Write coefficients of polynomial */
+stream: openw(fnamepoly);
+for i : 1 thru 2*N+3  do  (
+printf( stream,"C(:,~d)=~a;~%",i,C[i-1] ) );
+close(stream);
+

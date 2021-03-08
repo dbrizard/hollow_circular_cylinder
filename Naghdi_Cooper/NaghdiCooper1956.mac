@@ -1,0 +1,58 @@
+/* NAGHDI & COPPER, "Propagation of Elastic Waves in Cylindrical Shells", JASA 28(1), 1956.
+
+
+cr = reference velocity
+a = mean radius
+m = thickness ratio parameter h/a
+W = dimensionless circular frequency = wa/cr
+C = dimensionless phase velocity = c/cr
+
+*/
+
+C4: C2*C2;
+C6: C4*C2;
+z: C2/W2;
+A: m2/12;
+
+
+/* EQUATION IA */
+B: 1 - A;
+a10: (B-nu2)*z/k1 + (1 - nu2)*z*z/A + B - 2*nu*z;
+a11: (2*B*z - nu2*z + B)/k1 + (1 + z)*z/A + 2*B - 2*nu*z;
+a12: B*(2 + z)/k1 + z/A + B;
+a13: B/k1;
+
+eq1a: -a10 + a11*C2 - a12*C4 + a13*C6;
+
+for n:0 thru 4 do ( CC1[n]: ratcoef(eq1a, C2, n) );
+
+
+/* EQUATION IIA */
+a20: (1 - nu2)/k1*z + (1 - nu2)/A*z*z + 1;
+a21: ((2 - nu2)*z + 1)/k1 + z*(1 + z)/A + 2;
+a22: (2 + z)/k1 + z/A + 1;
+a23: 1/k1;
+
+eq2a: -a20 + a21*C2 - a22*C4 + a23*C6;
+
+for n:0 thru 4 do ( CC2[n]: ratcoef(eq2a, C2, n) );
+
+
+/* EQUATION IIIA */
+a30: (1 - nu2)*z + A/z;
+a31: 1 + z + A/z;
+a32: 1;
+
+eq3a: a30 - a31*C2 + a32*C4;
+
+for n:0 thru 3 do ( CC3[n]: ratcoef(eq3a, C2, n) );
+
+/* write results */
+stream: openw("nahgdicooper1956.m");
+printf(stream, "% Equation IA~%");
+for i:0 thru 4 do ( printf(stream, "C[~d]=~a~%", i, CC1[i]) );
+printf(stream, "% Equation IIA~%");
+for i:0 thru 4 do ( printf(stream, "C[~d]=~a~%", i, CC2[i]) );
+printf(stream, "% Equation IIIA~%");
+for i:0 thru 3 do ( printf(stream, "C[~d]=~a~%", i, CC3[i]) );
+close(stream);
